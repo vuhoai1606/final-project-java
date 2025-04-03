@@ -177,7 +177,7 @@ public class Display extends JFrame implements MouseListener {
         dichVuSP.setBounds(0, 60, 1445, 200);
 
         // Kết nối cơ sở dữ liệu và hiển thị dữ liệu
-        String url = "jdbc:sqlserver://DESKTOP-0A5HI5T:1433;"
+        String url = "jdbc:sqlserver://vu:1433;"
                 + "user=sa;"
                 + "password=123;"
                 + "databaseName=QuanLyDichVu1080;"
@@ -533,6 +533,27 @@ public class Display extends JFrame implements MouseListener {
                 String thoiGianCGEdit = thoiGianCGtf.getText();
                 String batDauCGEdit = batDauCGtf.getText();
 
+                if (isCallIdExists(sdtEdit)) {
+                    JOptionPane.showMessageDialog(this, "Mã cuộc gọi đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return; // Dừng xử lý nếu mã đã tồn tại
+                }
+
+
+                if (maCGEdit.isEmpty() || sdtEdit.isEmpty() || hoKHEdit.isEmpty() || tenKHEdit.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Hãy điền đầy đủ các thông tin.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (maCGEdit.length() != 5){
+                    JOptionPane.showMessageDialog(this, "Mã cuộc gọi phải có 5 kí tự", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (sdtEdit.length() != 10 || !sdtEdit.matches("\\d+")) {
+                    JOptionPane.showMessageDialog(this, "Số điện thoại phải 10 chữ số.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 // Cập nhật CSDL CUOCGOI
                 String updateCGSQL = "UPDATE CUOCGOI SET MaCG = ?, MaDV = ?, MaNV = ?, ThoiGianCG = ?, BatDauCG = ? WHERE MaCG = ?";
                 // Cập nhật CSDL KHACHHANG
@@ -619,7 +640,7 @@ public class Display extends JFrame implements MouseListener {
 
         // SẮP XẾP
         JButton sortButton = new JButton("Sắp xếp");
-        sortButton.setBounds(110, 565, 100, 50);
+        sortButton.setBounds(45, 565, 100, 50);
         sortButton.setFont(new Font("Arial", Font.PLAIN, 18));
         sortButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         chinhSuaPn.add(sortButton);
@@ -693,9 +714,9 @@ public class Display extends JFrame implements MouseListener {
             }
         });
 
-        // Tải lại trang
+        // Tải lại bảng
         JButton reloadButton = new JButton("Reload");
-        reloadButton.setBounds(230, 565, 100, 50);
+        reloadButton.setBounds(165, 565, 100, 50);
         reloadButton.setFont(new Font("Arial", Font.PLAIN, 18));
         reloadButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         chinhSuaPn.add(reloadButton);
@@ -704,6 +725,18 @@ public class Display extends JFrame implements MouseListener {
             DefaultTableModel model = (DefaultTableModel) statisticsTable.getModel();
             model.setRowCount(0); // Xóa dữ liệu cũ
             loadInitialData(model); // Hàm load dữ liệu ban đầu
+        });
+
+        // Thêm nút Thống kê vào giao diện quản lý thông tin
+        JButton statisticsButton = new JButton("Thống kê");
+        statisticsButton.setBounds(285, 565, 100, 50);
+        statisticsButton.setFont(new Font("Arial", Font.PLAIN, 18));
+        statisticsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        chinhSuaPn.add(statisticsButton);
+
+        statisticsButton.addActionListener(e -> {
+            StatisticsFrame statisticsFrame = new StatisticsFrame();
+            statisticsFrame.setVisible(true);
         });
 
         infoQuanLy.add(chinhSuaPn);
@@ -788,8 +821,9 @@ public class Display extends JFrame implements MouseListener {
                 "Mã Cuộc Gọi", "Số Điện Thoại", "Họ Đệm KH", "Tên KH", "Mã DV", "Mã NV", "Thời Gian Cuộc Gọi", "Bắt Đầu Cuộc Gọi"
         }, 0);
 
-        String url = "jdbc:sqlserver://DESKTOP-0A5HI5T:1433;"
-                + "user=sa;password=123;databaseName=QuanLyDichVu1080;encrypt=true;trustServerCertificate=true;loginTimeOut=4;";
+        String url = "jdbc:sqlserver://vu:1433;"
+                + "user=sa;password=123;databaseName=QuanLyDichVu1080;" +
+                "encrypt=true;trustServerCertificate=true;loginTimeOut=4;";
 
         try (Connection con = DriverManager.getConnection(url)) {
             String sql = "SELECT CG.MaCG, CG.SDT, KH.HoDemKH, KH.TenKH, CG.MaDV, CG.MaNV, CG.ThoiGianCG, CG.BatDauCG "
@@ -810,7 +844,7 @@ public class Display extends JFrame implements MouseListener {
     }
 
     private void loadInitialData(DefaultTableModel model) {
-        String url = "jdbc:sqlserver://DESKTOP-0A5HI5T:1433;"
+        String url = "jdbc:sqlserver://vu:1433;"
                 + "user=sa;password=123;databaseName=QuanLyDichVu1080;encrypt=true;trustServerCertificate=true;loginTimeOut=4;";
 
         try (Connection con = DriverManager.getConnection(url)) {
@@ -831,6 +865,27 @@ public class Display extends JFrame implements MouseListener {
             JOptionPane.showMessageDialog(this, "Lỗi khi tải dữ liệu từ cơ sở dữ liệu!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
+    private boolean isCallIdExists(String callId) {
+        String url = "jdbc:sqlserver://vu:1433;"
+                + "user=sa;"
+                + "password=123;"
+                + "databaseName=QuanLyDichVu1080;"
+                + "encrypt=true;"
+                + "trustServerCertificate=true;"
+                + "loginTimeOut=4;";
+        String query = "SELECT 1 FROM CUOCGOI WHERE MaCG = ?";
 
+        try (Connection con = DriverManager.getConnection(url);
+             PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setString(1, callId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next(); // Nếu có kết quả, mã cuộc gọi đã tồn tại
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi kiểm tra mã cuộc gọi!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+        return false;
+    }
 }
 

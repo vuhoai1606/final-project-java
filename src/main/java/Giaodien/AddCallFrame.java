@@ -280,6 +280,11 @@ public class AddCallFrame extends JFrame {
             return;
         }
 
+        if (callId.length() != 5){
+            JOptionPane.showMessageDialog(this, "Mã cuộc gọi phải có 5 kí tự", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         if (phone.length() != 10 || !phone.matches("\\d+")) {
             JOptionPane.showMessageDialog(this, "Số điện thoại phải 10 chữ số.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -290,7 +295,7 @@ public class AddCallFrame extends JFrame {
                 startHour, startMinute, startSecond);
 
         // Kết nối CSDL
-        String url = "jdbc:sqlserver://DESKTOP-0A5HI5T:1433;"
+        String url = "jdbc:sqlserver://vu:1433;"
                 + "user=sa;"
                 + "password=123;"
                 + "databaseName=QuanLyDichVu1080;"
@@ -354,7 +359,7 @@ public class AddCallFrame extends JFrame {
     }
 
     private boolean isCallIdExists(String callId) {
-        String url = "jdbc:sqlserver://DESKTOP-0A5HI5T:1433;"
+        String url = "jdbc:sqlserver://vu:1433;"
                 + "user=sa;"
                 + "password=123;"
                 + "databaseName=QuanLyDichVu1080;"
